@@ -1,95 +1,239 @@
-// App.js
-import React, { useState } from 'react'; // Make sure to import useState
- //import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import supabase from './supabaseClient';
 import stripePromise from './Stripe';
-import Login from './Login';
+import { Elements, useStripe } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useNavigate } from 'react-router-dom'; 
+import './css/tailwind-build.css'; // Include any required CSS
+import './css/index.css'; // Include any additional styles
+import AnimatedLandingPage from './animated-landing-template';
+  
+ 
+//const stripePromise = loadStripe('pk_live_51MocQcEsJN2nQEizqmCWp4NtPsJuMz69cbZlYmtT97mnV0PBPb3M4hDf97rBC2oWDG0dMBj6DYgKIgnSqO1cmQ9m00tNhbzVAW');
 
 function App() {
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  const handleCheckout = async (priceId) => {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const navigate = useNavigate();  // Initialize navigate
+
+
+  const handleSignUp = async () => {
     try {
-      const email = document.getElementById("emailInput").value; // Get the email from the input field
-      const password = document.getElementById("passwordInput").value; // Get the password from the input field
+      const { user, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+     // setUser(user);
+      // Redirect to Stripe checkout after successful signup
+      handleCheckout();
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
-      if (!email || !password) {
-        alert("Please enter both email and password");
-        return;
-      }
+  const handleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    setUser(data.user);  
+ 
+    window.location.href = 'http://localhost:3001/proxy'; // Redirect to your proxy endpoint   
+    
 
-      const response = await fetch('http://localhost:5000/api/create-checkout-session', { // Update this URL to your backend endpoint
+    // If login is successful, make a request to the backend to handle the redirection
+    //const response = await fetch('http://localhost:3000/redirect', {
+    // method: 'GET',
+    // credentials: 'include', // Include cookies if your auth is cookie-based
+    //});
+
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      // Fetch the checkout session ID from the server
+      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ priceId, email }), // Send both priceId and email to the backend
       });
-
+  
+      // Check if the response is ok
       if (!response.ok) {
         throw new Error('Failed to create checkout session');
       }
-
-      const { id } = await response.json(); // Make sure the response has an 'id' field
+  
+      // Parse the response body only once
+      const { id: sessionId } = await response.json();
+  
+      // Wait for the Stripe object to be initialized
       const stripe = await stripePromise;
-      await stripe.redirectToCheckout({ sessionId: id });
+  
+      // Redirect to Stripe Checkout with the session ID
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: sessionId,  // Pass the session ID here
+      });
+  
+      // Handle errors in redirection
+      if (error) {
+        throw error;
+      }
     } catch (error) {
-      console.error('Error during checkout:', error);
+      setError(error.message);
     }
+  };
+  
+  //handleCheckout();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) setError(error.message);
+    else setUser(null);
   };
 
   return (
-    <Router>
-      <div className="App">
-        <nav>
-          <Link to="/login">If already registered click here</Link>
-        </nav>
-
-        <div className="signup-options">
-      <h2>Select Your Plan</h2>
+    <div className="App"> 
      
-      <div>
-  <input
-    type="email"
-    placeholder="Enter your email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    id="emailInput" // Optional: Add ID for styling purposes (not used for value retrieval)
-    required
-  />
-  <input
-    type="password"
-    placeholder="Enter your password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    id="passwordInput" // Optional: Add ID for styling purposes (not used for value retrieval)
-    required
-  />
-</div>
+      {user ? (
+        <>
+          <p>Welcome, {user.email}</p>
+          <button onClick={handleLogout}>Logout</button>
+        </>
+      ) : (
+        <>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleSignUp}>Sign Up</button>
+          <button onClick={handleLogin}>Login</button>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <div className="signup-images">
-        <img
-          src="image1.jpg" // Replace with the URL or path of your first image
-          alt="Signup Option 1"
-          style={{ width: '300px', height: '300px', margin: '10px', cursor: 'pointer' }}
-          onClick={() => handleCheckout('monthly8usd')} // Replace with your actual price ID
-        />
-        <img
-          src="image2.jpg" // Replace with the URL or path of your second image
-          alt="Signup Option 2"
-          style={{ width: '300px', height: '300px', margin: '10px', cursor: 'pointer' }}
-          onClick={() => handleCheckout('yearly80usd')} // Replace with your actual price ID
-        />
-      </div>
+          <div
+                    class="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col max-md:tw-place-content-center"
+                >
+                    <a
+                        href=""
+                        aria-label="login"
+                        class="btn tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
+                    >
+                        <span>Log In</span>
+                        </i>
+                    </a>
+                </div>
+       
+        
+
+        </>
+      )}
+         <AnimatedLandingPage />;
+
+
+         <section
+            class="tw-mt-5 tw-flex tw-w-full tw-flex-col tw-place-items-center tw-p-[2%]"
+            id="pricing"
+        >
+            <h3
+                class="tw-text-3xl tw-font-medium tw-text-gray-300 max-md:tw-text-2xl"
+            >
+                Choose Your Plan
+            </h3> 
+
+            <div
+                class="tw-mt-10 tw-flex tw-flex-wrap tw-place-content-center tw-gap-8 max-lg:tw-flex-col"
+            >
+                <div
+                    class="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
+                >
+                    <h3 class="">
+                        <span class="tw-text-5xl tw-font-semibold tw-text-gray-400">$9</span>
+                        <span class="tw-text-2xl tw-text-gray-400">/month</span>
+                    </h3>
+                    <p class="tw-mt-3 tw-text-center tw-text-gray-300">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Ab, explicabo!
+                    </p>
+                    <hr />
+                    <ul
+                        class="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200"
+                    >
+                        <li>Lorem ipsum dolor sit amet.</li>
+                        <li>Lorem, ipsum.</li>
+                        <li>Lorem, ipsum dolor.</li>
+                        <li>Lorem ipsum dolor sit.</li>
+                    </ul>
+                    <a
+                        href="http://"
+                        class="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
+                    >
+                        Get now
+                    </a>
+                </div>
+                <div
+                    class="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-primary tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
+                >
+                    <h3 class="">
+                        <span class="tw-text-5xl tw-font-semibold  tw-text-gray-400">$19</span>
+                        <span class="tw-text-2xl tw-text-gray-400">/year</span>
+                    </h3>
+                    <p class="tw-mt-3 tw-text-center tw-text-gray-300">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Ab, explicabo!
+                    </p>
+                    <hr />
+                    <ul
+                        class="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200"
+                    >
+                        <li>Lorem ipsum dolor sit amet.</li>
+                        <li>Lorem, ipsum.</li>
+                        <li>Lorem, ipsum dolor.</li>
+                        <li>Lorem ipsum dolor sit.</li>
+                    </ul>
+                    <a
+                        href="http://"
+                        class="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
+                    >
+                        Get now
+                    </a>
+                </div>
+                
+            </div>
+        </section>
+
+
+        
+        <section
+            class="tw-flex tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-gap-[10%] tw-p-[5%] tw-px-[10%]"
+        >
+ 
+            <div
+                class="tw-mt-20 tw-flex tw-flex-col tw-place-items-center tw-gap-4"
+            >
+                <div class="tw-text-3xl max-md:tw-text-2xl tw-text-gray-400">
+                    Still have questions?
+                </div>
+                <a
+                    href="http://"
+                    class="btn !tw-rounded-full !tw-border-[1px] !tw-border-solid !tw-border-gray-300 !tw-bg-transparent tw-transition-colors tw-duration-[0.3s]"
+                >
+                    Contact
+                </a>
+            </div>
+        </section>  
+         
     </div>
-
-        <Routes>
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </div>
-    </Router>
   );
 }
 

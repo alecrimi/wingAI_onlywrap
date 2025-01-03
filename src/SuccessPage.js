@@ -1,19 +1,23 @@
-// SuccessPage.js
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+// src/SuccessPage.js
+import React, { useEffect, useState } from 'react';
 
-function SuccessPage() {
-  const location = useLocation();
+const SuccessPage = () => {
+  const [sessionId, setSessionId] = useState('');
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const sessionId = queryParams.get('session_id');
-    
-    // Call your function to check payment status
-    handlePaymentSuccess(sessionId);
-  }, [location]);
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('session_id');
+    setSessionId(id);
 
-  return <div>Payment Successful!</div>;
-}
+    // Optionally, use the session ID to confirm the payment with your backend or Stripe
+  }, []);
+
+  return (
+    <div>
+      <h1>Payment Successful</h1>
+      <p>Your payment was successful. Session ID: {sessionId}</p>
+    </div>
+  );
+};
 
 export default SuccessPage;
