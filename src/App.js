@@ -7,9 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import './css/tailwind-build.css'; // Include any required CSS
 import './css/index.css'; // Include any additional styles
 import AnimatedLandingPage from './animated-landing-template';
-  
- 
-//const stripePromise = loadStripe('pk_live_51MocQcEsJN2nQEizqmCWp4NtPsJuMz69cbZlYmtT97mnV0PBPb3M4hDf97rBC2oWDG0dMBj6DYgKIgnSqO1cmQ9m00tNhbzVAW');
 
 function App() {
   const [email, setEmail] = useState('');
@@ -40,13 +37,10 @@ function App() {
  
     window.location.href = 'http://localhost:3001/proxy'; // Redirect to your proxy endpoint   
     
-
     // If login is successful, make a request to the backend to handle the redirection
     //const response = await fetch('http://localhost:3000/redirect', {
     // method: 'GET',
-    // credentials: 'include', // Include cookies if your auth is cookie-based
-    //});
-
+     
     } catch (error) {
       setError(error.message);
     }
@@ -105,37 +99,41 @@ function App() {
         </>
       ) : (
         <>
+          
+
+          <div className="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col tw-items-end max-md:tw-place-content-center">
+ 
+       
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
           />
+          
           <button onClick={handleSignUp}>Sign Up</button>
-          <button onClick={handleLogin}>Login</button>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
 
-          <div
-                    class="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col max-md:tw-place-content-center"
-                >
-                    <a
-                        href=""
-                        aria-label="login"
-                        class="btn tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
-                    >
-                        <span>Log In</span>
-                        </i>
-                    </a>
-                </div>
-       
-        
-
+            <a
+              href="#"
+              aria-label="login"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}
+              className="btn tw-ml-auto tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
+            >
+              <span>LogIn</span>
+            </a>
+          </div>
+          {error && <p style={{ color: 'red' }}>{error}</p>}       
         </>
       )}
          <AnimatedLandingPage />;
