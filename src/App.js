@@ -119,8 +119,6 @@ function App() {
             className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
           />
           
-          <button onClick={handleSignUp}>Sign Up</button>
-
             <a
               href="#"
               aria-label="login"
@@ -172,12 +170,14 @@ function App() {
                         <li>Lorem, ipsum dolor.</li>
                         <li>Lorem ipsum dolor sit.</li>
                     </ul>
-                    <a
-                        href="http://"
-                        class="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
-                    >
-                        Get now
-                    </a>
+                    
+                    <button
+              onClick={handleSignUp}
+              className="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
+            >
+              Sign Up
+            </button>
+
                 </div>
                 <div
                     class="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-primary tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
@@ -199,12 +199,12 @@ function App() {
                         <li>Lorem, ipsum dolor.</li>
                         <li>Lorem ipsum dolor sit.</li>
                     </ul>
-                    <a
-                        href="http://"
-                        class="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
-                    >
-                        Get now
-                    </a>
+                    <button
+              onClick={handleSignUp}
+              className="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
+            >
+              Sign Up
+            </button>
                 </div>
                 
             </div>
