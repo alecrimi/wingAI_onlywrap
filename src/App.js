@@ -102,21 +102,21 @@ function App() {
           <div className="tw-space-y-4">
           <div className="tw-text-gray-300 tw-text-center tw-mb-4 tw-whitespace-pre-line">
               You are just one step-away. Create your account to get started!<br />
-              By signing up, you agree to our Terms of Service and Privacy Policy.<br />
+              By signing up, you agree to our Terms of Service and Privacy Policy.<br /> 
             </div>
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700   tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700  tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
             />
             <button
               onClick={handleSignUp}
@@ -152,20 +152,20 @@ function App() {
         </>
       ) : (
         <>
-          <div className="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col tw-items-end max-md:tw-place-content-center">
+          <div className="tw-mx-4 tw-flex tw-flex-row-reverse tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col-reverse ">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="tw-p-2 tw-border tw-rounded md:tw-w-1/2"
+              className="tw-p-2 tw-border tw-rounded tw-ml-auto    md:tw-w-1/2"
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="tw-p-2 tw-border tw-rounded md:tw-w-1/2"
+              className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
             />
             <a
               href="#"
@@ -174,7 +174,7 @@ function App() {
                 e.preventDefault();
                 handleLogin();
               }}
-              className="btn tw-ml-auto tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
+              className="btn tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]   "
             >
               <span>LogIn</span>
             </a>
