@@ -13,7 +13,8 @@ function App() {
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
-  const [processing, setProcessing] = useState(false);
+  const [showSignupForm, setShowSignupForm] = useState(false);
+  const [selectedPriceType, setSelectedPriceType] = useState(null);
   const navigate = useNavigate();  // Initialize navigate
 
 
@@ -54,6 +55,9 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          priceType: selectedPriceType
+        }),
       });
   
       // Check if the response is ok
@@ -89,9 +93,58 @@ function App() {
     else setUser(null);
   };
 
+  if (showSignupForm) {
+    return (
+      <div className="tw-min-h-screen tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-gray-900">
+        <div className="tw-w-full tw-max-w-md tw-p-8 tw-rounded-lg tw-bg-gray-800 tw-shadow-lg">
+          <h2 className="tw-text-3xl tw-font-semibold tw-text-gray-200 tw-mb-6 tw-text-center">Sign Up  for {selectedPriceType === 'monthly' ? 'Monthly' : 'Yearly'} Plan
+          </h2>
+          <div className="tw-space-y-4">
+          <div className="tw-text-gray-300 tw-text-center tw-mb-4 tw-whitespace-pre-line">
+              You are just one step-away. Create your account to get started!<br />
+              By signing up, you agree to our Terms of Service and Privacy Policy.<br />
+            </div>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+            />
+            <button
+              onClick={handleSignUp}
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-purple-600 tw-text-white hover:tw-bg-purple-700 tw-transition-colors"
+            >
+              Create Account
+            </button>
+            <button
+              onClick={() => {
+                setShowSignupForm(false);
+                setEmail('');
+                setPassword('');
+                setError(null);
+
+              }}
+              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 hover:tw-bg-gray-600 tw-transition-colors"
+            >
+              Back to Main Page
+            </button>
+          </div>
+          {error && <p className="tw-mt-4 tw-text-red-500 tw-text-center">{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="App"> 
-     
+    <div className="App">
       {user ? (
         <>
           <p>Welcome, {user.email}</p>
@@ -99,26 +152,21 @@ function App() {
         </>
       ) : (
         <>
-          
-
           <div className="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col tw-items-end max-md:tw-place-content-center">
- 
-       
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="tw-p-2 tw-border tw-rounded   md:tw-w-1/2"
-          />
-          
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="tw-p-2 tw-border tw-rounded md:tw-w-1/2"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="tw-p-2 tw-border tw-rounded md:tw-w-1/2"
+            />
             <a
               href="#"
               aria-label="login"
@@ -131,86 +179,76 @@ function App() {
               <span>LogIn</span>
             </a>
           </div>
-          {error && <p style={{ color: 'red' }}>{error}</p>}       
+          {error && <p style={{ color: 'red' }}>{error}</p>}
         </>
       )}
-         <AnimatedLandingPage />;
 
+      <AnimatedLandingPage />
 
-         <section
-            class="tw-mt-5 tw-flex tw-w-full tw-flex-col tw-place-items-center tw-p-[2%]"
-            id="pricing"
-        >
-            <h3
-                class="tw-text-3xl tw-font-medium tw-text-gray-300 max-md:tw-text-2xl"
-            >
-                Choose Your Plan
-            </h3> 
+      <section className="tw-mt-5 tw-flex tw-w-full tw-flex-col tw-place-items-center tw-p-[2%]" id="pricing">
+        <h3 className="tw-text-3xl tw-font-medium tw-text-gray-300 max-md:tw-text-2xl">
+          Choose Your Plan
+        </h3>
 
-            <div
-                class="tw-mt-10 tw-flex tw-flex-wrap tw-place-content-center tw-gap-8 max-lg:tw-flex-col"
-            >
-                <div
-                    class="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
-                >
-                    <h3 class="">
-                        <span class="tw-text-5xl tw-font-semibold tw-text-gray-400">$9</span>
-                        <span class="tw-text-2xl tw-text-gray-400">/month</span>
-                    </h3>
-                    <p class="tw-mt-3 tw-text-center tw-text-gray-300">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Ab, explicabo!
-                    </p>
-                    <hr />
-                    <ul
-                        class="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200"
-                    >
-                        <li>Lorem ipsum dolor sit amet.</li>
-                        <li>Lorem, ipsum.</li>
-                        <li>Lorem, ipsum dolor.</li>
-                        <li>Lorem ipsum dolor sit.</li>
-                    </ul>
-                    
-                    <button
-              onClick={handleSignUp}
+        <div className="tw-mt-10 tw-flex tw-flex-wrap tw-place-content-center tw-gap-8 max-lg:tw-flex-col">
+          <div className="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]">
+            <h3>
+              <span className="tw-text-5xl tw-font-semibold tw-text-gray-400">$9</span>
+              <span className="tw-text-2xl tw-text-gray-400">/month</span>
+            </h3>
+            <p className="tw-mt-3 tw-text-center tw-text-gray-300">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab, explicabo!
+            </p>
+            <hr />
+            <ul className="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200">
+              <li>Lorem ipsum dolor sit amet.</li>
+              <li>Lorem, ipsum.</li>
+              <li>Lorem, ipsum dolor.</li>
+              <li>Lorem ipsum dolor sit.</li>
+            </ul>
+            <button
+              onClick={() => {
+                setShowSignupForm(true);
+                setEmail('');
+                setPassword('');
+                setError(null);
+              }}
               className="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
             >
               Sign Up
             </button>
+          </div>
 
-                </div>
-                <div
-                    class="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-primary tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
-                >
-                    <h3 class="">
-                        <span class="tw-text-5xl tw-font-semibold  tw-text-gray-400">$19</span>
-                        <span class="tw-text-2xl tw-text-gray-400">/year</span>
-                    </h3>
-                    <p class="tw-mt-3 tw-text-center tw-text-gray-300">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Ab, explicabo!
-                    </p>
-                    <hr />
-                    <ul
-                        class="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200"
-                    >
-                        <li>Lorem ipsum dolor sit amet.</li>
-                        <li>Lorem, ipsum.</li>
-                        <li>Lorem, ipsum dolor.</li>
-                        <li>Lorem ipsum dolor sit.</li>
-                    </ul>
-                    <button
-              onClick={handleSignUp}
+          <div className="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-primary tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]">
+            <h3>
+              <span className="tw-text-5xl tw-font-semibold tw-text-gray-400">$49</span>
+              <span className="tw-text-2xl tw-text-gray-400">/year</span>
+            </h3>
+            <p className="tw-mt-3 tw-text-center tw-text-gray-300">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab, explicabo!
+            </p>
+            <hr />
+            <ul className="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200">
+              <li>Lorem ipsum dolor sit amet.</li>
+              <li>Lorem, ipsum.</li>
+              <li>Lorem, ipsum dolor.</li>
+              <li>Lorem ipsum dolor sit.</li>
+            </ul>
+            <button
+              onClick={() => {
+                setShowSignupForm(true);
+                setEmail('');
+                setPassword('');
+                setError(null);
+                setSelectedPriceType('yearly');
+              }}
               className="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
             >
               Sign Up
             </button>
-                </div>
-                
-            </div>
-        </section>
-
-
+          </div>
+        </div>
+      </section>
         
         <section
             class="tw-flex tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-gap-[10%] tw-p-[5%] tw-px-[10%]"

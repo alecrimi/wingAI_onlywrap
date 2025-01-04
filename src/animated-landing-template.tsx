@@ -83,13 +83,13 @@ const LandingPage = () => {
                     >
                         <a
                             class="btn tw-bg-[#7e22ce85] tw-shadow-lg tw-shadow-primary tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
-                            href=""
+                            href="#pricing"
                         >
                             Get started
                         </a>
                         <a
                             class="btn tw-flex tw-gap-2 !tw-bg-black !tw-text-white tw-transition-colors tw-duration-[0.3s] hover:!tw-bg-white hover:!tw-text-black"
-                            href=""
+                            href="#benefit"
                         >
                             <i class="bi bi-play-circle-fill"></i>
                             <span>Learn more</span>
@@ -119,7 +119,7 @@ const LandingPage = () => {
         </section>
         
         <section
-            class="tw-relative tw-flex tw-w-full tw-max-w-[100vw] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden tw-p-6"
+            class="tw-relative tw-flex tw-w-full tw-max-w-[100vw] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden tw-p-6" id="benefit"
         >
             <div
                 class="tw-mt-8 tw-flex tw-flex-col tw-place-items-center tw-gap-5"
