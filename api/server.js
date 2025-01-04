@@ -4,11 +4,8 @@ const cors = require('cors'); // Include CORS if needed
 const Stripe = require('stripe');
 require('dotenv').config({ path: '../.env' });   // To use environment variables from .env file
 
-
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-
  
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -16,14 +13,26 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());  // Parse JSON bodies
 app.use(cors()); // Enable CORS if making requests from another origin
 
+// Define different price IDs for monthly and yearly plans
+const PRICE_IDS = {
+  monthly: 'price_1Puuq5EsJN2nQEizSu0o6biJ',  // Your monthly price ID
+  yearly: 'price_1PuuqdEsJN2nQEiz85KLIKPa'   // Your yearly price ID
+};
+
 // Route to handle the checkout session creation
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
+
+    const { priceType } = req.body; // Get the priceType from the request body
+    // Select price ID based on the plan
+    const priceId = priceType === 'monthly' ? PRICE_IDS.monthly : PRICE_IDS.yearly;
+
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: 'price_1Puuq5EsJN2nQEizSu0o6biJ',  // Replace with your price ID
+          price: priceId, // Use the selected price ID
           quantity: 1,
         },
       ],
