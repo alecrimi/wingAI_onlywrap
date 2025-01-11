@@ -25,6 +25,8 @@ const LandingPage = () => {
             },
         });
 
+         
+
         // GSAP timeline for reveal-up elements
         const sections = document.querySelectorAll(".hero-section,.tw-relative,.reveal-up,.tw-mt-5,.tw-text-3xl "); // Change if needed
         sections.forEach((sec) => {
@@ -37,7 +39,7 @@ const LandingPage = () => {
                 },
             });
 
-            revealUptimeline.to(sec.querySelectorAll(".reveal-up"), {
+            revealUptimeline.to(sec.querySelectorAll(".reveal-up,.tw-relative"), {
                 opacity: 1,
                 duration: 0.8,
                 y: "0%", // Move elements from out-of-view to their normal position
@@ -106,8 +108,8 @@ const LandingPage = () => {
                         id="dashboard"
                     >
                         <img
-                            src="./assets/images/home/dashboard.png"
-                           
+                            src="/assets/images/home/dashboard.png"
+                            alt="" 
                         />
                     </div>
 
@@ -253,7 +255,7 @@ const LandingPage = () => {
                             class="tw-h-[50px] tw-w-[50px] tw-overflow-hidden tw-rounded-full"
                         >
                             <img
-                                src="./assets/images/people/women.jpg"
+                                src="./assets/images/people/women.jpg"  
                                 class="tw-w-full tw-h-auto tw-object-contain"
           style={{ maxWidth: '100%', height: 'auto' }} 
                                 alt="women"
