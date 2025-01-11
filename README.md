@@ -19,3 +19,4 @@ and for deploying the production on Vercel
 ```
 vercel --prod
 ```
+![Summary of the components](https://github.com/alecrimi/wingAI_onlywrap/blob/main/summary.jpg)
