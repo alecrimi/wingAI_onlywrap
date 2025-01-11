@@ -11,3 +11,11 @@ The potential payments are through Stripe.
 The Vite deployment is ready for production Vercel.
 
 Just a reminder, in Node.js the equivalent of requirements.txt for Python is package.json.
+
+```
+npm create-react-app
+```
+and for deploying the production on Vercel 
+```
+vercel --prod
+```
