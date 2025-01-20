@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react'; 
+//import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import supabase from './supabaseClient';
 import stripePromise from './Stripe';
+
+import Cancel from './cancel';
 
 import './css/tailwind-build.css'; // Include any required CSS
 import './css/index.css'; // Include any additional styles
@@ -13,19 +17,57 @@ function App() {
   const [error, setError] = useState(null);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [selectedPriceType, setSelectedPriceType] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState('initial'); // 'initial', 'processing', 'success', 'error'
 
+  useEffect(() => {
+    // Check URL parameters when component mounts
+    const params = new URLSearchParams(window.location.search);
+    const session_id = params.get('session_id');
+ 
+    const email = params.get('email');
 
+    const password = params.get('password');
+
+    console.log("Verifying payment for session ID:", session_id);
+
+    //if (session_id && showSignupForm) {
+      if (session_id  ) {
+
+      console.log('pre-verify')
+      console.log(email)
+      verifyPayment(session_id,email,password);
+    }
+  }, [showSignupForm,email,password]);
+
+  const verifyPayment = async (sessionId, email,password) => {
+    try {
+      const response = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId, email,password }),  // Send both sessionId and email
+      });
+  
+      const data = await response.json();
+      if (data.success) {
+        console.log('Payment successful');
+      } else {
+        console.log('Payment not successful');
+      }
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+    }
+  };
 
   const handleSignUp = async () => {
-    try {
-      
-      const { user, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
+    try { 
+      //const { user, error } = await supabase.auth.signUp({ email, password });
+      //if (error) throw error;
 
       //setUser(user);
        // Store the user data temporarily (you might want to use state or context for this)
-      sessionStorage.setItem('pendingUser', JSON.stringify(user));
- 
+
       // Redirect to Stripe checkout after successful signup
       handleCheckout();
     } catch (error) {
@@ -56,6 +98,8 @@ function App() {
     try {
       // Fetch the checkout session ID from the server
       //const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+      console.log('before checkout')
+      console.log(email)
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -63,7 +107,11 @@ function App() {
         },
         body: JSON.stringify({
           priceType: selectedPriceType,
-          email: email // Pass email to associate with the checkout session
+          email, password,
+          //metadata: { email, password }, // Don't reset
+            //email: email,
+            //password: password //Be careful
+
         }),
       });
   
@@ -77,12 +125,12 @@ function App() {
   
       // Wait for the Stripe object to be initialized
       const stripe = await stripePromise;
-  
+      console.log('Paying');
       // Redirect to Stripe Checkout with the session ID
       const { error } = await stripe.redirectToCheckout({
-        sessionId: sessionId,  // Pass the session ID here
+         sessionId,  // Pass the session ID here
       });
-  
+     
       // Handle errors in redirection
       if (error) {
         throw error;
@@ -92,35 +140,7 @@ function App() {
     }
   };
    
-// Add a new function to handle successful payments
-const handlePaymentSuccess = async (sessionId) => {
-  try {
-    // Verify the payment was successful with your backend
-    const response = await fetch('/api/verify-payment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ sessionId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to verify payment');
-    }
-
-    // Get the stored pending user
-    const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser'));
-    if (pendingUser) {
-      // Now set the user in your app state
-      setUser(pendingUser);
-      // Clean up
-      sessionStorage.removeItem('pendingUser');
-    }
-  } catch (error) {
-    setError(error.message);
-  }
-};
-
+ 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) setError(error.message);
@@ -129,57 +149,81 @@ const handlePaymentSuccess = async (sessionId) => {
 
   if (showSignupForm) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4"> 
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
         <div className="tw-w-full tw-max-w-md tw-p-8 tw-rounded-lg tw-bg-gray-800 tw-shadow-lg">
- 
-          <h2 className="tw-text-3xl tw-font-semibold tw-text-gray-200 tw-mb-6 tw-text-center">Sign Up  for {selectedPriceType === 'monthly' ? 'Monthly' : 'Yearly'} Plan
-          </h2>
-          <div className="tw-space-y-4">
-          <div className="tw-text-gray-300 tw-text-center tw-mb-4 tw-whitespace-pre-line">
-              You are just one step-away. Create your account to get started!<br />
-              By signing up, you agree to our Terms of Service and Privacy Policy.<br /> 
+          {paymentStatus === 'success' ? (
+            <div className="tw-text-center tw-text-gray-200">
+              <h2 className="tw-text-2xl tw-mb-4">Payment Successful!</h2>
+              <p>Your account has been created.</p>
+              <p>Redirecting to dashboard...</p>
             </div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700   tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700  tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
-            />
-            <button
-              onClick={handleSignUp}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-purple-600 tw-text-white hover:tw-bg-purple-700 tw-transition-colors"
-            >
-              Create Account
-            </button>
-            <button
-              onClick={() => {
-                setShowSignupForm(false);
-                setEmail('');
-                setPassword('');
-                setError(null);
-
-              }}
-              className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 hover:tw-bg-gray-600 tw-transition-colors"
-            >
-              Back to Main Page
-            </button>
-          </div>
-          {error && <p className="tw-mt-4 tw-text-red-500 tw-text-center">{error}</p>}
+          ) : paymentStatus === 'processing' ? (
+            <div className="tw-text-center tw-text-gray-200">
+              <h2 className="tw-text-2xl tw-mb-4">Processing Payment</h2>
+              <p>Please wait while we verify your payment...</p>
+            </div>
+          ) : (
+            <>
+              <h2 className="tw-text-3xl tw-font-semibold tw-text-gray-200 tw-mb-6 tw-text-center">
+                Sign Up for {selectedPriceType === 'monthly' ? 'Monthly' : 'Yearly'} Plan
+              </h2>
+              <div className="tw-space-y-4">
+                <div className="tw-text-gray-300 tw-text-center tw-mb-4 tw-whitespace-pre-line">
+                  You are just one step-away. Create your account to get started!<br />
+                  By signing up, you agree to our Terms of Service and Privacy Policy.<br />
+                </div>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-border tw-border-gray-600 focus:tw-border-purple-500 focus:tw-outline-none"
+                />
+                <button
+                  onClick={handleSignUp}
+                  disabled={paymentStatus === 'processing'}
+                  className="tw-w-full tw-p-3 tw-rounded tw-bg-purple-600 tw-text-white hover:tw-bg-purple-700 tw-transition-colors disabled:tw-opacity-50"
+                >
+                  Create Account
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSignupForm(false);
+                    setEmail('');
+                    setPassword('');
+                    setError(null);
+                    setPaymentStatus('initial');
+                  }}
+                  className="tw-w-full tw-p-3 tw-rounded tw-bg-gray-700 tw-text-gray-200 hover:tw-bg-gray-600 tw-transition-colors"
+                >
+                  Back to Main Page
+                </button>
+              </div>
+              {error && (
+                <p className="tw-mt-4 tw-text-red-500 tw-text-center">{error}</p>
+              )}
+              {paymentStatus === 'error' && (
+                <p className="tw-mt-4 tw-text-red-500 tw-text-center">
+                  There was an error processing your payment. Please try again.
+                </p>
+              )}
+            </>
+          )}
         </div>
       </div>
     );
   }
-
   return (
+    
     <div className="App">
+ 
       {user ? (
         <>
           <p>Welcome, {user.email}</p>
@@ -243,8 +287,8 @@ const handlePaymentSuccess = async (sessionId) => {
             <button
               onClick={() => {
                 setShowSignupForm(true);
-                setEmail('');
-                setPassword('');
+                //setEmail('');
+                //setPassword('');
                 setError(null);
                 setSelectedPriceType('monthly');
               }}
@@ -272,8 +316,8 @@ const handlePaymentSuccess = async (sessionId) => {
             <button
               onClick={() => {
                 setShowSignupForm(true);
-                setEmail('');
-                setPassword('');
+                //setEmail('');
+                //setPassword('');
                 setError(null);
                 setSelectedPriceType('yearly');
               }}
@@ -304,7 +348,10 @@ const handlePaymentSuccess = async (sessionId) => {
             </div>
         </section>  
          
+     
+
     </div>
+     
   );
 }
 

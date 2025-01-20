@@ -1,24 +1,22 @@
-import Stripe from 'stripe';  // Use `import` instead of `require`
-const stripekey =  process.env.VITE_STRIPE_SECRET_KEY;
-const stripe = Stripe(stripekey);  // Use `new Stripe()` for initialization
+// checkout.js - Updated checkout endpoint
+import Stripe from 'stripe';
+const stripekey = process.env.VITE_STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripekey);
+
+const baseUrl = 'https://wingai2.vercel.app';
 
 export default async (req, res) => {
   if (req.method === 'POST') {
     try {
-      console.log('Received request body:', req.body); // Debug log
-      const { priceType , email} = req.body;
-      
-      // Define different price IDs for monthly and yearly plans
+      const { priceType, email, password } = req.body;
       const PRICE_IDS = {
-        monthly: 'price_1Puuq5EsJN2nQEizSu0o6biJ',  // Your monthly price ID
-        yearly: 'price_1PuuqdEsJN2nQEiz85KLIKPa'          // yearly price ID
+        monthly: 'price_1QjRbREsJN2nQEizPEDnJZKM',
+        yearly: 'price_1PuuqdEsJN2nQEiz85KLIKPa',
       };
 
-      // Select price ID based on the plan
       const priceId = priceType === 'monthly' ? PRICE_IDS.monthly : PRICE_IDS.yearly;
-      
-      console.log('Selected price ID:', priceId); // Debug log
 
+      // Create a Stripe checkout session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -27,16 +25,19 @@ export default async (req, res) => {
             quantity: 1,
           },
         ],
-        
         mode: 'subscription',
-        success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${req.headers.origin}/?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, // Redirect to the home page or a generic page
         cancel_url: `${req.headers.origin}/cancel`,
-        customer_email: email, // Pre-fill customer email
         metadata: {
-          email: email // Store email in metadata for reference
-        }
+          email: email,
+          password: password,
+          //isNewUser: 'true', // Use this metadata to distinguish new users
+        },
       });
+
+
       
+      // Return the session ID to the client
       res.json({ id: session.id });
     } catch (error) {
       console.error('Error creating checkout session:', error.message);

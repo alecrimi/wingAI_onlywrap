@@ -15,8 +15,10 @@
     "axios": "^1.7.9",
     "bootstrap-icons": "^1.11.3",
     "gsap": "^3.12.5",
+    "raw-body": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.1",
     "stripe": "^17.5.0",
     "tailwind": "^4.0.0",
     "vercel": "^39.2.5"
