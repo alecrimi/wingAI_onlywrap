@@ -22,3 +22,5 @@ and for deploying the production on Vercel
 vercel --prod
 ```
 ![Summary of the components](https://github.com/alecrimi/wingAI_onlywrap/blob/main/summary.jpg)
+
+The validation of payment with routes and webhooks from Stripe might be problematic, try simple flags get post messaging.
